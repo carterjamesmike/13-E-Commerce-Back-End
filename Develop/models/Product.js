@@ -29,6 +29,7 @@ Product.init(
     stock: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      defaultValue: 10,
       validate: {
         isNumeric: true,
       }
@@ -40,7 +41,7 @@ Product.init(
         key: 'id',
         unique: false
       }
-    },
+    }
   },
   {
     sequelize,
