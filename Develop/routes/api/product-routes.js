@@ -1,15 +1,16 @@
 const router = require('express').Router();
-const { Product, Category, Tag, ProductTag } = require('../../models');
+const { Product, Category, Tag, ProductTag  } = require('../../models');
 
 // The `/api/products` endpoint
 
 // get all products
+//Found out why call is doubled for product_tag
 router.get('/', async (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
   try {
     const productData = await Product.findAll({
-      inclue: [{ model: Category}]
+      include: [{ model: Category }, { model: Tag, through: ProductTag, as: 'product_tags' }]
     });
     res.status(200).json(productData);
   } catch (err) {
@@ -18,9 +19,23 @@ router.get('/', async (req, res) => {
 });
 
 // get one product
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
+  try {
+    const productData = await Product.findByPk(req.params.id, {
+      include: [{ model: Category }, { model: Tag, through: ProductTag, as: 'product_tags' }],
+    });
+
+    if (!productData) {
+      res.status(404).json({ message: 'No product found with this id!' });
+      return;
+    }
+
+    res.status(200).json(productData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 // create new product
